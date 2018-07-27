@@ -37,14 +37,14 @@ class Search:
     def by_time_spent(self, str_time_spent):
         matching_entries = []
         for each in self.entries:
-            if each._time_spent == int(str_time_spent):
+            if each.time_spent == int(str_time_spent):
                 matching_entries.append(each)
         return matching_entries
 
     def exact(self, exact_phrase):
         matching_entries = []
         for each in self.entries:
-            if (exact_phrase in each.notes) or (exact_phrase in entry.title):
+            if (exact_phrase in each.notes) or (exact_phrase in each.title):
                 matching_entries.append(each)
 
         return matching_entries
@@ -52,7 +52,7 @@ class Search:
     def regex(self, target_string):
         matching_entries = []
         for each in self.entries:
-            matching_entries.extend(re.findall(target_string, each.notes))
-            matching_entries.extend(re.findall(target_string, each.title))
+            if re.findall(target_string, each.notes)!=[] or re.findall(target_string, each.title) != []:
+                matching_entries.append(each)
 
         return matching_entries

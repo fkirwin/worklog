@@ -19,7 +19,24 @@ class Log:
         return entries
 
     def write_new_entry(self, entry_input):
-        with open(self.file_location, "w+") as csv_out:
-            entryout = csv.DictWriter(csv_out, delimiter=',', fieldnames=entry_input.writable_dict.keys(), lineterminator='\n')
-            entryout.writeheader()
-            entryout.writerow(entry_input.writable_dict)
+        sniffer = csv.Sniffer()
+        header = False
+
+        with open(self.file_location, "r") as csv_out:
+            try:
+                header = sniffer.has_header(csv_out.read(1024))
+            except:
+                print("No header was detected!")
+
+        with open(self.file_location, "a+") as csv_out:
+            try:
+                header = sniffer.has_header(csv_out.read(1024))
+            except:
+                print("No header was detected!")
+            entryout = csv.DictWriter(csv_out, delimiter=',', fieldnames=entry_input.writable_dict.keys(),
+                                      lineterminator='\n')
+            if header:
+                entryout.writerow(entry_input.writable_dict)
+            else:
+                entryout.writeheader()
+                entryout.writerow(entry_input.writable_dict)

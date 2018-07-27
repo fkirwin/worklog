@@ -11,7 +11,7 @@ class Entry:
     def __init__(self, _title, _start_time, _time_spent, _notes=None):
         self._title = _title
         self._start_time = self.__handle_date(_start_time)
-        self._time_spent = int(_time_spent)
+        self._time_spent = self.__handle_time_spent(_time_spent)
         self._notes = _notes
 
 
@@ -68,11 +68,7 @@ class Entry:
 
     @time_spent.setter
     def time_spent(self, time_minutes):
-        try:
-            self._time_spent = int(time_minutes)
-        except (ValueError, TypeError) as err:
-            print("The parameter entered was not a valid number.  Please enter a valid decimal or integer")
-            raise err
+        return self.__handle_time_spent(time_minutes)
 
     @property
     def get_end_time(self):
@@ -87,9 +83,18 @@ class Entry:
         try:
             if isinstance(target_date, str):
                 return customutils.generate_proper_date_from_string(target_date, self.date_format)
+            elif target_date.lower() == "now":
+                return customutils.generate_proper_date_from_date(datetime.datetime.now(), self.date_format)
             else:
                 return customutils.generate_proper_date_from_date(target_date, self.date_format)
         except Exception as err:
             print("Something went wrong with setting the date")
             raise err
 
+    def __handle_time_spent(self, time_spent):
+        try:
+            r_time_spent = int(time_spent)
+            return r_time_spent
+        except (ValueError, TypeError) as err:
+            print("The parameter entered was not a valid number.  Please enter a valid decimal or integer")
+            raise err
