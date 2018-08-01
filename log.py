@@ -8,6 +8,10 @@ class Log:
 
     def __init__(self, file_location):
         self.file_location = file_location
+        try:
+            open(self.file_location, 'a').close()
+        except Exception as exc:
+            raise exc
 
     def get_entries(self):
         entries = []
@@ -21,18 +25,12 @@ class Log:
     def write_new_entry(self, entry_input):
         sniffer = csv.Sniffer()
         header = False
-
-        with open(self.file_location, "r") as csv_out:
+        with open(self.file_location, "r+") as csv_out:
             try:
                 header = sniffer.has_header(csv_out.read(1024))
             except:
                 print("No header was detected!")
-
         with open(self.file_location, "a+") as csv_out:
-            try:
-                header = sniffer.has_header(csv_out.read(1024))
-            except:
-                print("No header was detected!")
             entryout = csv.DictWriter(csv_out, delimiter=',', fieldnames=entry_input.writable_dict.keys(),
                                       lineterminator='\n')
             if header:
