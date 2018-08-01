@@ -2,11 +2,10 @@ import datetime
 import re
 
 import customutils
-import entry
-
 
 
 class Search:
+    """Represents a search that can be performed on the data."""
     def __init__(self, entries=None):
         # Playing with REGEX.  Probably not the best approach.
         self.options = {funct: funct for funct in re.findall(r"\b\w+(?<!_{2})\b", str(Search.__dict__.keys()))
@@ -52,7 +51,7 @@ class Search:
     def regex(self, target_string):
         matching_entries = []
         for each in self.entries:
-            if re.findall(target_string, each.notes)!=[] or re.findall(target_string, each.title) != []:
+            if re.findall(target_string, each.notes) != [] or re.findall(target_string, each.title) != []:
                 matching_entries.append(each)
 
         return matching_entries

@@ -2,7 +2,9 @@ import datetime
 
 import customutils
 
+
 class Entry:
+    """A class representing an entry object."""
     column_delim = ","
     row_delim = "\n"
     msg = "Title: {} {} Total Duration: {} {} Started: {} {} Ended: {} {} Notes: {} {}"
@@ -13,7 +15,6 @@ class Entry:
         self._start_time = self.__handle_date(_start_time)
         self._time_spent = self.__handle_time_spent(_time_spent)
         self._notes = _notes
-
 
     def __str__(self):
         if self._time_spent:
@@ -68,7 +69,7 @@ class Entry:
 
     @time_spent.setter
     def time_spent(self, time_minutes):
-        return self.__handle_time_spent(time_minutes)
+        self._time_spent = self.__handle_time_spent(time_minutes)
 
     @property
     def get_end_time(self):

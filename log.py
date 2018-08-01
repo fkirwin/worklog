@@ -1,10 +1,10 @@
 import csv
-import datetime
 
 import entry
-import customutils
+
 
 class Log:
+    """File IO"""
 
     def __init__(self, file_location):
         self.file_location = file_location

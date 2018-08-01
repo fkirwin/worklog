@@ -4,15 +4,19 @@ import sys
 import customutils
 import entry
 import log
+import search
+
 
 class Menu:
+    """User IO and management."""
     DEFAULT_LOG = 'entries.CSV'
 
     def __init__(self):
-        self.options ={"Menu":["mm", self.display_main_menu],
-                       "New Entry": ["ne", self.write_entry],
-                       "Search Entries": ["se", self.search_entries],
-                       "Exit the program": ["e", self.exit_program]}
+        self.options = {"Menu": ["mm", self.display_main_menu],
+                        "New Entry": ["ne", self.write_entry],
+                        "Search Entries": ["se", self.search_entries],
+                        "Exit the program": ["e", self.exit_program]}
+        self.log_connection = log.Log(self.DEFAULT_LOG)
 
     def run(self):
         while True:
@@ -27,13 +31,12 @@ class Menu:
             else:
                 print("{} is not a valid choice".format(user_choice))
 
-
     def display_main_menu(self):
         """The main menu."""
         print("Greetings!  Here are our options.")
         for name, method in self.options.items():
-            print("Type {} or {} to access {}.  {}"
-                  .format(name, method[0], method[1].__name__.replace("_", " "), method[1].__doc__))
+            print("Type {} to {}.  {}"
+                  .format(method[0], method[1].__name__.replace("_", " "), method[1].__doc__))
 
     def write_entry(self):
         """Write a single entry to file."""
@@ -46,21 +49,97 @@ class Menu:
                 time_spent = self._get_time_spent()
                 notes = self._get_details()
                 new_entry = entry.Entry(title, start_time, time_spent, notes)
-                log_connection = log.Log(self.DEFAULT_LOG)
-                log_connection.write_new_entry(new_entry)
+                self.log_connection.write_new_entry(new_entry)
             except Exception as exc:
                 print(exc)
-                attempt-=1
+                attempt -= 1
             else:
                 print(str(new_entry))
                 print("Entry was successful!  Heading back to the main menu.")
                 break
-        self.display_main_menu()
-
 
     def search_entries(self):
         """Search all available entries based on user criterias."""
+        search_options = {"by date": ["date", "by_date"],
+                          "by time spent": ["time spent", "by_time_spent"],
+                          "exact": ["exact", "exact"],
+                          "regex": ["regex", "regex"]}
+        search_engine = search.Search(self.log_connection.get_entries())
         print("Please select a method to search for entries.")
+        for key, value in search_options.items():
+            print("Type {} to search using {}.".format(value[0], key))
+        search_selection = input("Selection:")
+        if search_selection.lower() == "date":
+            search_results = self._search_date(search_engine)
+            if isinstance(search_results, list):
+                for each in search_results:
+                    print(each)
+        elif search_selection.lower() == "time spent":
+            search_results = self._search_time_spent(search_engine)
+            if isinstance(search_results, list):
+                for each in search_results:
+                    print(each)
+        elif search_selection.lower() == "exact":
+            search_results = self._search_exact(search_engine)
+            if isinstance(search_results, list):
+                for each in search_results:
+                    print(each)
+        elif search_selection.lower() == "regex":
+            search_results = self._search_regex(search_engine)
+            if isinstance(search_results, list):
+                for each in search_results:
+                    print(each)
+        else:
+            print("That is not a valid selection.")
+            self.search_entries()
+
+    def _search_date(self, search_engine):
+        start_time_selection = input("Which date?  Use %m-%d-%Y format.")
+        try:
+            returned_entries = search_engine.by_date(start_time_selection)
+            if len(returned_entries) > 0:
+                return returned_entries
+            else:
+                return "No entries meet that criteria."
+        except Exception as err:
+            print(err)
+            return self._search_date(search_engine)
+
+    def _search_time_spent(self, search_engine):
+        time_spent_selection = input("How long?  Use an integer.")
+        try:
+            returned_entries = search_engine.by_time_spent(time_spent_selection)
+            if len(returned_entries) > 0:
+                return returned_entries
+            else:
+                return "No entries meet that criteria."
+        except Exception as err:
+            print(err)
+            return self._search_time_spent(search_engine)
+
+    def _search_exact(self, search_engine):
+        exact_selection = input("Type the exact title or note.")
+        try:
+            returned_entries = search_engine.exact(exact_selection)
+            if len(returned_entries) > 0:
+                return returned_entries
+            else:
+                return "No entries meet that criteria."
+        except Exception as err:
+            print(err)
+            return self._search_exact()
+
+    def _search_regex(self, search_engine):
+        regex_selection = input("Type the pattern.")
+        try:
+            returned_entries = search_engine.regex(regex_selection)
+            if len(returned_entries) > 0:
+                return returned_entries
+            else:
+                return "No entries meet that criteria."
+        except Exception as err:
+            print(err)
+            return self._search_regex()
 
     def _get_title(self):
         title = input("Please enter a title for this entry:")
@@ -72,9 +151,8 @@ class Menu:
     def _get_start_time(self):
         try:
             start_time = input("Please enter a start time for the task in the following format {}.  "
-                       "Or type 'now' to stamp with current date and time:"
-                       .format(entry.Entry.date_format
-                               .replace("%", " ").replace("- ", "-").replace(": ", ":")))
+                               "Or type 'now' to stamp with current date and time:"
+                               .format(entry.Entry.date_format.replace("%", " ").replace("- ", "-").replace(": ", ":")))
             if start_time.lower() == "now":
                 start_time = datetime.datetime.now().strftime(entry.Entry.date_format)
             customutils.generate_proper_date_from_string(start_time, entry.Entry.date_format)
@@ -103,5 +181,4 @@ class Menu:
         """Exits the program."""
         print("Have a nice day.")
         sys.exit(0)
-
 
