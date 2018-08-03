@@ -29,9 +29,11 @@ class Log:
             try:
                 header = sniffer.has_header(csv_out.read(1024))
             except:
-                print("No header was detected!")
+                pass
         with open(self.file_location, "a+") as csv_out:
-            entryout = csv.DictWriter(csv_out, delimiter=',', fieldnames=entry_input.writable_dict.keys(),
+            entryout = csv.DictWriter(csv_out,
+                                      delimiter=',',
+                                      fieldnames=entry_input.writable_dict.keys(),
                                       lineterminator='\n')
             if header:
                 entryout.writerow(entry_input.writable_dict)

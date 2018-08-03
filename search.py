@@ -2,7 +2,7 @@ import datetime
 import re
 
 import customutils
-
+import entry
 
 class Search:
     """Represents a search that can be performed on the data."""
@@ -20,16 +20,10 @@ class Search:
         return "Search Options: \n" + "\n".join(return_string)
 
     def by_date(self, date):
-        compare_format = "%m-%d-%Y"
         matching_entries = []
-        try:
-            formatted_datetime = datetime.datetime.strptime(date, compare_format)
-        except (ValueError, TypeError) as err:
-            print("Please use formating as follows: ".format(compare_format))
-            raise err
-
+        formatted_datetime = datetime.datetime.strptime(date, entry.Entry.date_format)
         for each in self.entries:
-            if customutils.generate_proper_date_from_date(each.start_time, compare_format).date() == formatted_datetime.date():
+            if customutils.generate_proper_date_from_date(each.start_date, entry.Entry.date_format).date() == formatted_datetime.date():
                 matching_entries.append(each)
         return matching_entries
 
@@ -45,7 +39,6 @@ class Search:
         for each in self.entries:
             if (exact_phrase in each.notes) or (exact_phrase in each.title):
                 matching_entries.append(each)
-
         return matching_entries
 
     def regex(self, target_string):
@@ -53,5 +46,4 @@ class Search:
         for each in self.entries:
             if re.findall(target_string, each.notes) != [] or re.findall(target_string, each.title) != []:
                 matching_entries.append(each)
-
         return matching_entries
